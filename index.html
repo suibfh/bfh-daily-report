@@ -38,10 +38,12 @@
 <body>
   <button onclick="fetchReport()">📢 デイリーレポート表示</button>
   <pre id="reportOutput">ここにレポートが表示されます</pre>
+  <small id="rateDisplay"></small>
   <small id="noticeText"></small>
 
   <script>
     let lastClicked = 0;
+
     async function fetchReport() {
       const now = Date.now();
       if (now - lastClicked < 60000) {
@@ -53,6 +55,14 @@
       document.getElementById("reportOutput").textContent = "📡 データ取得中...";
 
       try {
+        const usdToJpy = await fetch("https://suibfh.github.io/bfh-daily-report/usd_jpy.json")
+          .then(res => res.json())
+          .then(data => data.rate ?? 150)
+          .catch(() => 150);
+
+        // ここで為替レートの表示を更新
+        document.getElementById("rateDisplay").textContent = `為替レート：$1 = ¥${usdToJpy.toFixed(2)}`;
+
         const oasUrl = "https://api.coingecko.com/api/v3/simple/price"
           + "?ids=oasys"
           + "&vs_currencies=usd"
@@ -108,8 +118,8 @@
         const tweet = `📘【BFHデイリーレポート】
 🔥 BPCバーン総量：${Number(burnBalance).toLocaleString()} BPC
 💰 Tealswapプール保有量：${Number(walletBalance).toLocaleString()} BPC
-💎 BPC価格：$${bpcPrice}（24h ${bpcChange}%）
-💎 OAS価格：$${oasPrice.toFixed(5)}（24h ${oasChange.toFixed(2)}%）
+💎 BPC価格：$${bpcPrice}（¥${(bpcPrice * usdToJpy).toFixed(2)} / 24h ${bpcChange}%）
+💎 OAS価格：$${oasPrice.toFixed(5)}（¥${(oasPrice * usdToJpy).toFixed(2)} / 24h ${oasChange.toFixed(2)}%）
 #BPC #OAS #ブレヒロ`;
 
         document.getElementById("reportOutput").textContent = tweet;
@@ -118,6 +128,7 @@
       } catch (e) {
         document.getElementById("reportOutput").textContent = "❌ データ取得に失敗しました。時間をおいて再度お試しください。";
         document.getElementById("noticeText").textContent = "";
+        document.getElementById("rateDisplay").textContent = "";
       }
     }
   </script>
