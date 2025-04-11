@@ -1,0 +1,33 @@
+name: Update USD-JPY Rate
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # 毎日 7:00 JST に実行（UTC 22:00）
+  workflow_dispatch:       # 手動実行も可能（GitHubから実行ボタン）
+
+jobs:
+  update-jpy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Run get_jpy.py to update usd_jpy.json
+        run: python get_jpy.py
+
+      - name: Commit and push usd_jpy.json
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add usd_jpy.json
+          git commit -m "Update USD-JPY rate"
+          git push
