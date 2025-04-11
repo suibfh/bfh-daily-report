@@ -33,10 +33,15 @@
       display: block;
       margin-top: 0.5em;
     }
+    #alertText {
+      color: darkorange;
+      margin-bottom: 0.5em;
+    }
   </style>
 </head>
 <body>
   <button onclick="fetchReport()">📢 デイリーレポート表示</button>
+  <small id="alertText"></small>
   <pre id="reportOutput">ここにレポートが表示されます</pre>
   <small id="rateDisplay"></small>
   <small id="noticeText"></small>
@@ -47,11 +52,11 @@
     async function fetchReport() {
       const now = Date.now();
       if (now - lastClicked < 60000) {
-        document.getElementById("reportOutput").textContent = "⚠️ 1分に1回まで実行可能です。しばらくお待ちください。";
+        document.getElementById("alertText").textContent = "⚠️ 1分に1回まで実行可能です。しばらくお待ちください。";
         return;
       }
       lastClicked = now;
-
+      document.getElementById("alertText").textContent = "";
       document.getElementById("reportOutput").textContent = "📡 データ取得中...";
 
       try {
@@ -62,8 +67,7 @@
         const usdToJpy = jpyData.rate ?? 150;
         const rateDate = jpyData.date ? new Date(jpyData.date).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }) : "不明";
 
-        document.getElementById("rateDisplay").textContent =
-          `為替レート：$1 = ¥${usdToJpy.toFixed(2)}（取得日時：${rateDate}）`;
+        document.getElementById("rateDisplay").textContent = `為替レート：$1 = ¥${usdToJpy.toFixed(2)}（取得日時：${rateDate}）`;
 
         const oasUrl = "https://api.coingecko.com/api/v3/simple/price"
           + "?ids=oasys"
@@ -117,12 +121,12 @@
           console.log("⚠️ BPC価格の取得に失敗しました。");
         }
 
-        const tweet = `📘【BFHデイリーレポート】
-🔥 BPCバーン総量：${Math.floor(burnBalance).toLocaleString()} BPC
-💰 Tealswapプール保有量：${Math.floor(walletBalance).toLocaleString()} BPC
-💎 BPC価格：$${bpcPrice}（¥${(bpcPrice * usdToJpy).toFixed(2)} / 24h ${bpcChange}%）
-💎 OAS価格：$${oasPrice.toFixed(5)}（¥${(oasPrice * usdToJpy).toFixed(2)} / 24h ${oasChange.toFixed(2)}%）
-#BPC #OAS #ブレヒロ`;
+        const tweet = `📘【BFHデイリーレポート】\n`
+          + `🔥 BPCバーン総量：${Math.floor(burnBalance).toLocaleString()} BPC\n`
+          + `💰 Tealswapプール保有量：${Math.floor(walletBalance).toLocaleString()} BPC\n`
+          + `💎 BPC価格：$${bpcPrice}（¥${(bpcPrice * usdToJpy).toFixed(2)} / 24h ${bpcChange}%）\n`
+          + `💎 OAS価格：$${oasPrice.toFixed(5)}（¥${(oasPrice * usdToJpy).toFixed(2)} / 24h ${oasChange.toFixed(2)}%）\n`
+          + `#BPC #OAS #ブレヒロ`;
 
         document.getElementById("reportOutput").textContent = tweet;
         document.getElementById("noticeText").textContent = "※この情報は当サイトが取得した最新データです。公式発表とは異なる場合があります。";
