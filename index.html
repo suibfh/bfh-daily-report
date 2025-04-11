@@ -58,10 +58,9 @@
           + "&vs_currencies=usd"
           + "&include_24hr_change=true";
 
-        const [coingeckoOAS, geckoBPC, jpyRate] = await Promise.all([
+        const [coingeckoOAS, geckoBPC] = await Promise.all([
           fetch(oasUrl).then(res => res.json()),
-          fetch("https://api.geckoterminal.com/api/v2/networks/oasys/pools/0x53d749ea2507182586b9795ad1435938473d448d").then(res => res.json()),
-          fetch("https://api.exchangerate.host/latest?base=USD&symbols=JPY").then(res => res.json())
+          fetch("https://api.geckoterminal.com/api/v2/networks/oasys/pools/0x53d749ea2507182586b9795ad1435938473d448d").then(res => res.json())
         ]);
 
         const getBalance = async (rpc, contract, address) => {
@@ -94,18 +93,23 @@
           "0x53D749Ea2507182586b9795aD1435938473D448d"
         );
 
-        const usdToJpy = jpyRate.rates.JPY;
         const oasPrice = coingeckoOAS.oasys.usd;
         const oasChange = coingeckoOAS.oasys.usd_24h_change;
 
-        const bpcPrice = parseFloat(geckoBPC.data.attributes.base_token_price_usd);
-        const bpcChange = parseFloat(geckoBPC.data.attributes.price_change_percentage.h24);
+        let bpcPrice = "?";
+        let bpcChange = "?";
+        try {
+          bpcPrice = parseFloat(geckoBPC.data.attributes.base_token_price_usd).toFixed(5);
+          bpcChange = parseFloat(geckoBPC.data.attributes.price_change_percentage.h24).toFixed(2);
+        } catch (e) {
+          console.log("⚠️ BPC価格の取得に失敗しました。");
+        }
 
         const tweet = `📘【BFHデイリーレポート】
 🔥 BPCバーン総量：${Number(burnBalance).toLocaleString()} BPC
 💰 Tealswapプール保有量：${Number(walletBalance).toLocaleString()} BPC
-💎 BPC価格：$${bpcPrice.toFixed(5)}（¥${(bpcPrice * usdToJpy).toFixed(2)} / 24h ${bpcChange.toFixed(2)}%）
-💎 OAS価格：$${oasPrice.toFixed(5)}（¥${(oasPrice * usdToJpy).toFixed(2)} / 24h ${oasChange.toFixed(2)}%）
+💎 BPC価格：$${bpcPrice}（24h ${bpcChange}%）
+💎 OAS価格：$${oasPrice.toFixed(5)}（24h ${oasChange.toFixed(2)}%）
 #BPC #OAS #ブレヒロ`;
 
         document.getElementById("reportOutput").textContent = tweet;
