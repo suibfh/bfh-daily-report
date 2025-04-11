@@ -60,7 +60,7 @@
       document.getElementById("reportOutput").textContent = "📡 データ取得中...";
 
       try {
-        const jpyData = await fetch("https://suibfh.github.io/bfh-daily-report/usd_jpy.json")
+        const jpyData = await fetch("https://suibfh.github.io/bfh-daily-report/usd_jpy.json?ts=" + Date.now())
           .then(res => res.json())
           .catch(() => ({ rate: 150, date: null }));
 
