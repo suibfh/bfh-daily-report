@@ -2,9 +2,9 @@ import requests
 import json
 from datetime import datetime
 
-APP_ID = "fe65b781026b40a3b884b042fbcfca66"
+APP_ID = "fe65b781026b40a3b884b042fbcfca66"  # ←あなたのApp ID
 
-url = f"https://openexchangerates.org/api/latest.json?app_id={APP_ID}"
+url = f"https://openexchangerates.org/api/latest.json?app_id={APP_ID}&symbols=JPY"
 
 try:
     res = requests.get(url)
@@ -23,7 +23,7 @@ try:
         output = {
             "date": datetime.utcnow().isoformat() + "Z",
             "rate": None,
-            "error": "JPY not found in OXR response"
+            "error": "JPY not found in response"
         }
         print("⚠️ JPYレートが取得できませんでした。")
 
